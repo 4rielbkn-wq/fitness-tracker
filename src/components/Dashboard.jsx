@@ -5,6 +5,7 @@ import {
   Legend, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import ProgressRing from './ProgressRing';
+import WeeklySummary from './WeeklySummary';
 import {
   calcTargets, getStreak, getWeightTrend,
   getTrendDisplay, getProteinInsight, getCalorieInsight,
@@ -249,6 +250,9 @@ export default function Dashboard({ entries, settings }) {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+      {/* ── Weekly Summary + Points ── */}
+      <WeeklySummary entries={entries} settings={settings} />
 
       {/* ── Feelings Chart ── */}
       <div className="chart-card">

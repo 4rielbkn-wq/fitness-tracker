@@ -635,3 +635,212 @@ input[type="range"] {
 .auto-preview strong {
   color: var(--text);
 }
+
+/* ── Level / Points ── */
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.level-badge { font-size: 2rem; line-height: 1; }
+
+.level-info { display: flex; flex-direction: column; gap: 3px; }
+
+.level-name {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.level-pts {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.level-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.level-bar {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.level-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+
+.level-next {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.points-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.points-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.points-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  width: 110px;
+  flex-shrink: 0;
+}
+
+.points-bar-bg {
+  flex: 1;
+  height: 5px;
+  background: var(--surface2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.points-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.points-val {
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── Before / After ── */
+.before-after {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 0;
+}
+
+.ba-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ba-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.ba-val {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.ba-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-weight: 900;
+}
+
+.ba-chevron { font-size: 2rem; line-height: 1; }
+.ba-diff    { font-size: 0.85rem; font-weight: 800; }
+
+.ba-verdict {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+/* ── Coach Note ── */
+.coach-card { border-color: rgba(211,47,47,0.2); }
+
+.coach-note {
+  font-size: 0.88rem;
+  color: #ccc;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Why Tags ── */
+.why-section { display: flex; flex-direction: column; gap: 10px; }
+
+.why-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.why-tag {
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.why-tag.active {
+  background: var(--primary-dim);
+  border-color: var(--primary-border);
+  color: var(--primary);
+}
+
+/* ── No-scale toggle ── */
+.no-scale-toggle {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  color: var(--muted) !important;
+  margin-top: 4px;
+}
+
+.no-scale-toggle input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.no-scale-placeholder {
+  padding: 11px 12px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}

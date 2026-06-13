@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getEntries, saveEntry, getTodayStr } from '../utils/storage';
 import { calcTargets } from '../utils/recommendations';
 
@@ -11,12 +11,17 @@ const FEELINGS = [
   { key: 'sleep',    label: 'Sleep Quality', emoji: '😴' },
 ];
 
+const WHY_TAGS = [
+  '😫 Stress', '😴 Poor sleep', '✈️ Travel', '🍕 Social event',
+  '🤒 Illness', '🍫 Cheat day', '😰 Long day', '❓ Other',
+];
+
 const blankEntry = () => ({
   date: getTodayStr(),
   weight: '', protein: '', calories: '', steps: '',
   trained: null, trainingType: '',
   feelings: { energy: 3, hunger: 3, soreness: 3, sleep: 3 },
-  note: '',
+  note: '', whyTags: [], noScaleDay: false,
 });
 
 export default function DailyEntry({ entries, settings, onSave }) {
@@ -27,11 +32,13 @@ export default function DailyEntry({ entries, settings, onSave }) {
     const existing = entries.find(e => e.date === getTodayStr());
     if (existing) {
       setForm({
+        ...blankEntry(),
         ...existing,
-        weight:   existing.weight   ?? '',
+        weight:   existing.noScaleDay ? '' : (existing.weight   ?? ''),
         protein:  existing.protein  ?? '',
         calories: existing.calories ?? '',
         steps:    existing.steps    ?? '',
+        whyTags:  existing.whyTags  || [],
       });
     }
   }, [entries]);
@@ -44,10 +51,19 @@ export default function DailyEntry({ entries, settings, onSave }) {
     setForm(prev => ({ ...prev, feelings: { ...prev.feelings, [key]: parseInt(val, 10) } }));
   }
 
+  function toggleWhyTag(tag) {
+    setForm(prev => ({
+      ...prev,
+      whyTags: prev.whyTags.includes(tag)
+        ? prev.whyTags.filter(t => t !== tag)
+        : [...prev.whyTags, tag],
+    }));
+  }
+
   function handleSave() {
     saveEntry({
       ...form,
-      weight:   form.weight   !== '' ? parseFloat(form.weight)     : null,
+      weight:   form.noScaleDay || form.weight === ''   ? null : parseFloat(form.weight),
       protein:  form.protein  !== '' ? parseInt(form.protein, 10)  : null,
       calories: form.calories !== '' ? parseInt(form.calories, 10) : null,
       steps:    form.steps    !== '' ? parseInt(form.steps, 10)    : null,
@@ -58,6 +74,20 @@ export default function DailyEntry({ entries, settings, onSave }) {
   }
 
   const targets = calcTargets(entries, settings);
+
+  // Show why-tags when energy is low, soreness is high, or weight jumps
+  const prevWeight = useMemo(() => {
+    const today = getTodayStr();
+    const prev = entries.filter(e => e.date < today && e.weight != null);
+    return prev.length ? prev[prev.length - 1].weight : null;
+  }, [entries]);
+
+  const weightFloat = form.weight !== '' ? parseFloat(form.weight) : null;
+  const showWhyTags =
+    form.feelings.energy <= 2 ||
+    form.feelings.soreness >= 4 ||
+    (weightFloat && prevWeight && Math.abs(weightFloat - prevWeight) >= 1.5);
+
   const todayLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
   });
@@ -67,14 +97,25 @@ export default function DailyEntry({ entries, settings, onSave }) {
       <div className="entry-date">{todayLabel}</div>
 
       <div className="form-grid">
-        <div className="form-field">
+        <div className="form-field" style={{ gridColumn: form.noScaleDay ? '1 / -1' : undefined }}>
           <label>⚖️ Body Weight</label>
-          <div className="input-unit">
-            <input type="number" step="0.1" placeholder="185.0"
-              value={form.weight} onChange={e => set('weight', e.target.value)} />
-            <span>{settings.weightUnit}</span>
-          </div>
+          {!form.noScaleDay ? (
+            <div className="input-unit">
+              <input type="number" step="0.1" placeholder="185.0"
+                value={form.weight} onChange={e => set('weight', e.target.value)} />
+              <span>{settings.weightUnit}</span>
+            </div>
+          ) : (
+            <div className="no-scale-placeholder">No scale today — trend will interpolate</div>
+          )}
+          <label className="no-scale-toggle">
+            <input type="checkbox" checked={form.noScaleDay}
+              onChange={e => set('noScaleDay', e.target.checked)} />
+            <span>No-scale day</span>
+          </label>
         </div>
+
+        {!form.noScaleDay && <div style={{ display: 'none' }} />}
 
         <div className="form-field">
           <label>🍗 Protein</label>
@@ -142,6 +183,21 @@ export default function DailyEntry({ entries, settings, onSave }) {
           </div>
         ))}
       </div>
+
+      {showWhyTags && (
+        <div className="why-section">
+          <div className="section-title">⚡ What happened? (optional)</div>
+          <div className="why-tags">
+            {WHY_TAGS.map(tag => (
+              <button key={tag}
+                className={`why-tag ${form.whyTags.includes(tag) ? 'active' : ''}`}
+                onClick={() => toggleWhyTag(tag)}>
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="form-field">
         <label>📝 Note (optional)</label>
