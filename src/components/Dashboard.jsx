@@ -33,10 +33,12 @@ function getWeekStart() {
 }
 
 const ttStyle = {
-  contentStyle: { background: '#1E1E1E', border: '1px solid #2C2C2C', borderRadius: 8, fontSize: 12 },
-  labelStyle: { color: '#888' },
-  cursor: { stroke: '#2C2C2C' },
+  contentStyle: { background: '#fff', border: '1px solid #E8DDD8', borderRadius: 8, fontSize: 12, color: '#2C2C2C' },
+  labelStyle: { color: '#9E8E88' },
+  cursor: { stroke: '#E8DDD8' },
 };
+const GRID  = '#EDE5DF';
+const TICK  = { fontSize: 10, fill: '#9E8E88' };
 
 export default function Dashboard({ entries, settings }) {
   const targets = useMemo(() => calcTargets(entries, settings), [entries, settings]);
@@ -194,9 +196,9 @@ export default function Dashboard({ entries, settings }) {
         <div className="chart-title">7-Day Rolling Weight ({settings.weightUnit})</div>
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#555' }} />
-            <YAxis tick={{ fontSize: 10, fill: '#555' }} domain={['auto', 'auto']} width={38} />
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+            <XAxis dataKey="date" tick={TICK} />
+            <YAxis tick={TICK} domain={['auto', 'auto']} width={38} />
             <Tooltip {...ttStyle} />
             <Line type="monotone" dataKey="weight" name={`Weight (${settings.weightUnit})`}
               stroke="var(--primary)" strokeWidth={2.5} dot={false} connectNulls />
@@ -209,9 +211,9 @@ export default function Dashboard({ entries, settings }) {
         <div className="chart-title">Daily Calories vs Target</div>
         <ResponsiveContainer width="100%" height={160}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#555' }} />
-            <YAxis tick={{ fontSize: 10, fill: '#555' }} width={38} />
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+            <XAxis dataKey="date" tick={TICK} />
+            <YAxis tick={TICK} width={38} />
             <Tooltip {...ttStyle} />
             <ReferenceLine y={targets.calories} stroke="var(--warning)" strokeDasharray="4 2"
               label={{ value: 'Target', fill: 'var(--warning)', fontSize: 10, position: 'insideTopRight' }} />
@@ -225,9 +227,9 @@ export default function Dashboard({ entries, settings }) {
         <div className="chart-title">Daily Protein (g)</div>
         <ResponsiveContainer width="100%" height={160}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#555' }} />
-            <YAxis tick={{ fontSize: 10, fill: '#555' }} width={38} />
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+            <XAxis dataKey="date" tick={TICK} />
+            <YAxis tick={TICK} width={38} />
             <Tooltip {...ttStyle} />
             <ReferenceLine y={targets.protein} stroke="var(--primary)" strokeDasharray="4 2"
               label={{ value: 'Target', fill: 'var(--primary)', fontSize: 10, position: 'insideTopRight' }} />
@@ -241,9 +243,9 @@ export default function Dashboard({ entries, settings }) {
         <div className="chart-title">Daily Steps</div>
         <ResponsiveContainer width="100%" height={150}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#555' }} />
-            <YAxis tick={{ fontSize: 10, fill: '#555' }} width={38} />
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+            <XAxis dataKey="date" tick={TICK} />
+            <YAxis tick={TICK} width={38} />
             <Tooltip {...ttStyle} />
             <ReferenceLine y={settings.stepsGoal} stroke="#3b82f6" strokeDasharray="4 2" />
             <Bar dataKey="steps" name="Steps" fill="#3b82f6" radius={[3, 3, 0, 0]} opacity={0.85} />
@@ -259,11 +261,11 @@ export default function Dashboard({ entries, settings }) {
         <div className="chart-title">Feelings Over Time (1–5)</div>
         <ResponsiveContainer width="100%" height={190}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#555' }} />
-            <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 10, fill: '#555' }} width={24} />
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+            <XAxis dataKey="date" tick={TICK} />
+            <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} tick={TICK} width={24} />
             <Tooltip {...ttStyle} />
-            <Legend wrapperStyle={{ fontSize: 11, color: '#666' }} />
+            <Legend wrapperStyle={{ fontSize: 11, color: '#9E8E88' }} />
             <Line type="monotone" dataKey="energy"   name="Energy"   stroke="#f59e0b" strokeWidth={1.5} dot={false} connectNulls />
             <Line type="monotone" dataKey="soreness" name="Soreness" stroke="var(--primary)" strokeWidth={1.5} dot={false} connectNulls />
             <Line type="monotone" dataKey="sleep"    name="Sleep"    stroke="#8b5cf6" strokeWidth={1.5} dot={false} connectNulls />

@@ -9,7 +9,7 @@ export default function ProgressRing({ value = 0, max = 1, size = 96, strokeWidt
     <div className="progress-ring">
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
         <circle cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke="var(--surface2)" strokeWidth={strokeWidth} />
+          fill="none" stroke="var(--ring-track)" strokeWidth={strokeWidth} />
         <circle cx={size / 2} cy={size / 2} r={radius}
           fill="none" stroke={ringColor}
           strokeWidth={strokeWidth}

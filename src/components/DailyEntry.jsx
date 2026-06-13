@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getEntries, saveEntry, getTodayStr } from '../utils/storage';
 import { calcTargets } from '../utils/recommendations';
+import FoodSearch from './FoodSearch';
+import Slider from './Slider';
 
 const TRAINING_TYPES = ['strength', 'cardio', 'rest'];
 
@@ -21,7 +23,7 @@ const blankEntry = () => ({
   weight: '', protein: '', calories: '', steps: '',
   trained: null, trainingType: '',
   feelings: { energy: 3, hunger: 3, soreness: 3, sleep: 3 },
-  note: '', whyTags: [], noScaleDay: false,
+  note: '', whyTags: [], noScaleDay: false, foods: [],
 });
 
 export default function DailyEntry({ entries, settings, onSave }) {
@@ -39,6 +41,7 @@ export default function DailyEntry({ entries, settings, onSave }) {
         calories: existing.calories ?? '',
         steps:    existing.steps    ?? '',
         whyTags:  existing.whyTags  || [],
+        foods:    existing.foods    || [],
       });
     }
   }, [entries]);
@@ -60,11 +63,22 @@ export default function DailyEntry({ entries, settings, onSave }) {
     }));
   }
 
+  function handleFoodsChange(newFoods) {
+    const totalKcal    = Math.round(newFoods.reduce((s, f) => s + f.kcal, 0));
+    const totalProtein = Math.round(newFoods.reduce((s, f) => s + f.protein, 0) * 10) / 10;
+    setForm(prev => ({
+      ...prev,
+      foods:    newFoods,
+      calories: newFoods.length ? String(totalKcal)    : prev.calories,
+      protein:  newFoods.length ? String(totalProtein) : prev.protein,
+    }));
+  }
+
   function handleSave() {
     saveEntry({
       ...form,
       weight:   form.noScaleDay || form.weight === ''   ? null : parseFloat(form.weight),
-      protein:  form.protein  !== '' ? parseInt(form.protein, 10)  : null,
+      protein:  form.protein  !== '' ? parseFloat(form.protein)  : null,
       calories: form.calories !== '' ? parseInt(form.calories, 10) : null,
       steps:    form.steps    !== '' ? parseInt(form.steps, 10)    : null,
     });
@@ -75,7 +89,6 @@ export default function DailyEntry({ entries, settings, onSave }) {
 
   const targets = calcTargets(entries, settings);
 
-  // Show why-tags when energy is low, soreness is high, or weight jumps
   const prevWeight = useMemo(() => {
     const today = getTodayStr();
     const prev = entries.filter(e => e.date < today && e.weight != null);
@@ -96,27 +109,30 @@ export default function DailyEntry({ entries, settings, onSave }) {
     <div className="entry-form">
       <div className="entry-date">{todayLabel}</div>
 
+      {/* Weight */}
+      <div className="form-field">
+        <label>⚖️ Body Weight</label>
+        {!form.noScaleDay ? (
+          <div className="input-unit">
+            <input type="number" step="0.1" placeholder="185.0"
+              value={form.weight} onChange={e => set('weight', e.target.value)} />
+            <span>{settings.weightUnit}</span>
+          </div>
+        ) : (
+          <div className="no-scale-placeholder">No scale today — trend will interpolate</div>
+        )}
+        <label className="no-scale-toggle">
+          <input type="checkbox" checked={form.noScaleDay}
+            onChange={e => set('noScaleDay', e.target.checked)} />
+          <span>No-scale day</span>
+        </label>
+      </div>
+
+      {/* Food Search */}
+      <FoodSearch foods={form.foods} onFoodsChange={handleFoodsChange} />
+
+      {/* Protein + Calories + Steps */}
       <div className="form-grid">
-        <div className="form-field" style={{ gridColumn: form.noScaleDay ? '1 / -1' : undefined }}>
-          <label>⚖️ Body Weight</label>
-          {!form.noScaleDay ? (
-            <div className="input-unit">
-              <input type="number" step="0.1" placeholder="185.0"
-                value={form.weight} onChange={e => set('weight', e.target.value)} />
-              <span>{settings.weightUnit}</span>
-            </div>
-          ) : (
-            <div className="no-scale-placeholder">No scale today — trend will interpolate</div>
-          )}
-          <label className="no-scale-toggle">
-            <input type="checkbox" checked={form.noScaleDay}
-              onChange={e => set('noScaleDay', e.target.checked)} />
-            <span>No-scale day</span>
-          </label>
-        </div>
-
-        {!form.noScaleDay && <div style={{ display: 'none' }} />}
-
         <div className="form-field">
           <label>🍗 Protein</label>
           <div className="input-unit">
@@ -135,7 +151,7 @@ export default function DailyEntry({ entries, settings, onSave }) {
           </div>
         </div>
 
-        <div className="form-field">
+        <div className="form-field" style={{ gridColumn: '1 / -1' }}>
           <label>👣 Steps</label>
           <div className="input-unit">
             <input type="number" placeholder={settings.stepsGoal}
@@ -145,6 +161,7 @@ export default function DailyEntry({ entries, settings, onSave }) {
         </div>
       </div>
 
+      {/* Training */}
       <div className="form-field">
         <label>🏋️ Did you train today?</label>
         <div className="toggle-group">
@@ -169,6 +186,7 @@ export default function DailyEntry({ entries, settings, onSave }) {
         )}
       </div>
 
+      {/* Feelings */}
       <div className="feelings-section">
         <div className="section-title">How do you feel?</div>
         {FEELINGS.map(({ key, label, emoji }) => (
@@ -176,14 +194,17 @@ export default function DailyEntry({ entries, settings, onSave }) {
             <span className="feeling-label">{emoji} {label}</span>
             <div className="slider-row">
               <span className="slider-val">{form.feelings[key]}</span>
-              <input type="range" min="1" max="5"
+              <Slider
                 value={form.feelings[key]}
-                onChange={e => setFeeling(key, e.target.value)} />
+                min={1} max={5}
+                onChange={e => setFeeling(key, e.target.value)}
+              />
             </div>
           </div>
         ))}
       </div>
 
+      {/* Why tags */}
       {showWhyTags && (
         <div className="why-section">
           <div className="section-title">⚡ What happened? (optional)</div>
@@ -199,6 +220,7 @@ export default function DailyEntry({ entries, settings, onSave }) {
         </div>
       )}
 
+      {/* Note */}
       <div className="form-field">
         <label>📝 Note (optional)</label>
         <textarea placeholder="How did today go?" rows={2}
