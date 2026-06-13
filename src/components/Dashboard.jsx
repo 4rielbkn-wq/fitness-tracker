@@ -101,9 +101,10 @@ export default function Dashboard({ entries, settings }) {
       <div className="dash-hero">
         <div className="hero-left">
           <div className="hero-goal-badge">{goalLabel}</div>
-          <div className="hero-trend" style={{ color: trendDisplay.color }}>
-            <span className="trend-arrow">{trendDisplay.arrow}</span>
-            <span className="trend-label">{trendDisplay.label}</span>
+          <div className="hero-trend">
+            <span className="trend-pill" style={{ background: trendDisplay.color }}>
+              {trendDisplay.arrow} {trendDisplay.label}
+            </span>
           </div>
         </div>
         {streak > 0 && (
