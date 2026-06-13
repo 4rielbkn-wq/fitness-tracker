@@ -1,41 +1,40 @@
 import { useState, useEffect } from 'react';
 import { getEntries, saveEntry, getTodayStr } from '../utils/storage';
+import { calcTargets } from '../utils/recommendations';
 
 const TRAINING_TYPES = ['strength', 'cardio', 'rest'];
 
 const FEELINGS = [
-  { key: 'energy',   label: 'Energy',        emoji: '⚡' },
-  { key: 'hunger',   label: 'Hunger',         emoji: '🍽️' },
-  { key: 'soreness', label: 'Soreness',       emoji: '💪' },
-  { key: 'sleep',    label: 'Sleep Quality',  emoji: '😴' },
+  { key: 'energy',   label: 'Energy',       emoji: '⚡' },
+  { key: 'hunger',   label: 'Hunger',        emoji: '🍽️' },
+  { key: 'soreness', label: 'Soreness',      emoji: '💪' },
+  { key: 'sleep',    label: 'Sleep Quality', emoji: '😴' },
 ];
 
 const blankEntry = () => ({
   date: getTodayStr(),
-  weight: '',
-  protein: '',
-  trained: null,
-  trainingType: '',
-  steps: '',
+  weight: '', protein: '', calories: '', steps: '',
+  trained: null, trainingType: '',
   feelings: { energy: 3, hunger: 3, soreness: 3, sleep: 3 },
   note: '',
 });
 
-export default function DailyEntry() {
+export default function DailyEntry({ entries, settings, onSave }) {
   const [form, setForm] = useState(blankEntry);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const existing = getEntries().find(e => e.date === getTodayStr());
+    const existing = entries.find(e => e.date === getTodayStr());
     if (existing) {
       setForm({
         ...existing,
-        weight: existing.weight ?? '',
-        protein: existing.protein ?? '',
-        steps: existing.steps ?? '',
+        weight:   existing.weight   ?? '',
+        protein:  existing.protein  ?? '',
+        calories: existing.calories ?? '',
+        steps:    existing.steps    ?? '',
       });
     }
-  }, []);
+  }, [entries]);
 
   function set(field, val) {
     setForm(prev => ({ ...prev, [field]: val }));
@@ -48,14 +47,17 @@ export default function DailyEntry() {
   function handleSave() {
     saveEntry({
       ...form,
-      weight:  form.weight  !== '' ? parseFloat(form.weight)  : null,
-      protein: form.protein !== '' ? parseInt(form.protein, 10) : null,
-      steps:   form.steps   !== '' ? parseInt(form.steps, 10)   : null,
+      weight:   form.weight   !== '' ? parseFloat(form.weight)     : null,
+      protein:  form.protein  !== '' ? parseInt(form.protein, 10)  : null,
+      calories: form.calories !== '' ? parseInt(form.calories, 10) : null,
+      steps:    form.steps    !== '' ? parseInt(form.steps, 10)    : null,
     });
     setSaved(true);
+    onSave();
     setTimeout(() => setSaved(false), 2000);
   }
 
+  const targets = calcTargets(entries, settings);
   const todayLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
   });
@@ -66,32 +68,44 @@ export default function DailyEntry() {
 
       <div className="form-grid">
         <div className="form-field">
-          <label>Body Weight</label>
+          <label>⚖️ Body Weight</label>
           <div className="input-unit">
             <input type="number" step="0.1" placeholder="185.0"
               value={form.weight} onChange={e => set('weight', e.target.value)} />
-            <span>lbs</span>
+            <span>{settings.weightUnit}</span>
           </div>
         </div>
 
         <div className="form-field">
-          <label>Protein</label>
+          <label>🍗 Protein</label>
           <div className="input-unit">
-            <input type="number" placeholder="150"
+            <input type="number" placeholder={targets.protein}
               value={form.protein} onChange={e => set('protein', e.target.value)} />
             <span>g</span>
           </div>
         </div>
 
-        <div className="form-field full-width">
-          <label>Steps</label>
-          <input type="number" placeholder="8000"
-            value={form.steps} onChange={e => set('steps', e.target.value)} />
+        <div className="form-field">
+          <label>🔥 Calories</label>
+          <div className="input-unit">
+            <input type="number" placeholder={targets.calories}
+              value={form.calories} onChange={e => set('calories', e.target.value)} />
+            <span>kcal</span>
+          </div>
+        </div>
+
+        <div className="form-field">
+          <label>👣 Steps</label>
+          <div className="input-unit">
+            <input type="number" placeholder={settings.stepsGoal}
+              value={form.steps} onChange={e => set('steps', e.target.value)} />
+            <span>steps</span>
+          </div>
         </div>
       </div>
 
       <div className="form-field">
-        <label>Did you train today?</label>
+        <label>🏋️ Did you train today?</label>
         <div className="toggle-group">
           {[true, false].map(v => (
             <button key={String(v)}
@@ -130,7 +144,7 @@ export default function DailyEntry() {
       </div>
 
       <div className="form-field">
-        <label>Note (optional)</label>
+        <label>📝 Note (optional)</label>
         <textarea placeholder="How did today go?" rows={2}
           value={form.note} onChange={e => set('note', e.target.value)} />
       </div>
